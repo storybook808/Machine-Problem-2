@@ -1,0 +1,20 @@
+Lab 3 Coffee Shop simulator
+This directory includes
+
+* queue.c -- coffee shop simulator assuming the shop can hold
+  at most one customer.  You should modify this.
+
+* trafficgen.c -- generates random customer arrivals and
+  service times.  You don't need to modify this. I included
+  this for your information.
+  
+* traffic.dat -- Traffic file.  It's the traffic you use
+  for this lab
+
+* test.dat -- small sample traffic file used for testing.
+  You can create your own.
+
+No make files here.  Just compile using gcc file.c
+Then run by typing ./a.out
+
+
