@@ -14,7 +14,7 @@
 #define NEXT      1 // Next customer in line. 
 
 //#define DEBUG     // Uncomment to activite debug lines.
-#define SCRIPT    // Uncomment to activite event text.
+//#define SCRIPT    // Uncomment to activite event text.
 #define TRUE      1
 #define FALSE     0
 
@@ -50,9 +50,9 @@ main(void)
    Item       *olditem;          // Old list element to discard
    int        currtime;          // Current time in the simulation
    int        serviceDepart;     // Departure time
-   double     x, y;
-   int        i, j;
-   int        numServer;
+   double     x, y;              // Temp variables.
+   int        i, j;              // More temp variables.
+   int        numServer;         // Number of servers working this shift.
    int        masterBusy;        // Busy flag for the coffee shop as a whole.
    int        masterFull;        // Full flag for the coffee shop as a whole.
 
@@ -65,7 +65,7 @@ main(void)
    }
 
    // Prompt for the number of servers.
-   do {
+   do { // Check if the numbe of servers are within valid range.
       printf("Enter the number of server (1 - %d): ", MAXSERVER);
       scanf("%d", &numServer);
    } while(numServer<1||numServer>MAXSERVER);
@@ -76,13 +76,13 @@ main(void)
    simstats.blocked = 0;
    simstats.accepted = 0;       // This was missing from Sasaki's original program.
    currtime=0;                  // Current time
-   masterBusy = FALSE;
+   masterBusy = FALSE;          // Shop starts not busy nor full.
    masterFull = FALSE;
 
    for(i=0; i<numServer; i++) {
-      server[i].count = 0;      // Initialize each server's line to 0.
-      server[i].busy  = FALSE;  // Initialize each server's busy flag to FALSE.
-      server[i].full  = FALSE;  // Initialize each server's full flah to FALSE.
+      server[i].count = 0;      // Server starts empty.
+      server[i].busy  = FALSE;  // Server starts not busy.
+      server[i].full  = FALSE;  // Server starts empty.
    }
 
    // Keep the program going if there are still customers within the queue even
@@ -96,9 +96,6 @@ main(void)
       if (arrivalhead!=NULL) {  // Check the next arrival
          if (arrivalhead->arrival==currtime) { // An arrival occurred
             simstats.arrived++; // update statistics
-
-            // "server.busy==0" -> "server.count<CAPACITY"
-            // If there is still room in the queue, then pull the next customer.
             
             // Check to see if any of the queues are currenty open for a customer.
             if (!masterFull) { // Customer is accepted into the server
@@ -111,7 +108,7 @@ main(void)
                j = 0;
 	       for(i=1; i<numServer; i++)
                   if(server[i].count<server[j].count)
-                     j = i;
+                     j = i; // j is the target line for the customer.
 
                // Add customer to server and update the state of the server
                server[j].arrival[server[j].count] = arrivalhead->arrival;
@@ -123,16 +120,16 @@ main(void)
                // Used to shorten the lines below.
                i = arrivalhead->service-1;
                
-               if(server[j].count>0)
+               if(server[j].count>0) // Another patron is in line already.
                   serviceDepart = server[j].departure[server[j].count-1]+i;
-               else
+               else // First in line.
                   serviceDepart = currtime+i;
                
                // Update customer departure time information in the queue.
                server[j].departure[server[j].count] = serviceDepart;
                
-               // Must be busy if there are as least one customer left in the
-               // queue.
+               // Update busy flag, because a customer has entered the line. If
+	       // the flag was already busy, then nothing will change to the flag.
                server[j].busy = TRUE;
                
                // Updated the number of patrons within the line.
@@ -142,7 +139,7 @@ main(void)
 	          printf("Customer lines up to server %d\n", j);
 	       #endif
 
-	       // Update full flag for current server.
+	       // Update full flag for current server if needed.
 	       if(server[j].count==CAPACITY)
 	          server[j].full = TRUE;
 
@@ -177,9 +174,10 @@ main(void)
 
       // Process any departures which occur at the end of the time slot.
       // Keeps track of the customers within the queue and shifts patrons
-      // forward in an orderly fashion.
+      // forward in an orderly fashion. This will also scroll through each
+      // server and check to see if their active patron is ready to depart.
       for(j=0; j<numServer; j++) {
-         if(server[j].busy == 1) { // Make sure something can depart
+         if(server[j].busy==1) { // Make sure something can depart
             if(server[j].departure[ACTIVE]==currtime) { // Customer will depart
                simstats.totaldelay += (currtime-server[j].arrival[ACTIVE])+1;
                               // The right hand side is the customer's delay
@@ -197,28 +195,32 @@ main(void)
                // Reduce the number of people in the line.
                server[j].count--;
 
-	       // Any customer that leaves means the server's line is no longer full.
+	       // Update server full flag. If any customer leaves the line, then
+	       // we know that the line cannot be full.
 	       server[j].full = FALSE;
 
 	       #ifdef SCRIPT
 	          printf("Customer leaves the shop happy from server %d\n", j);
 	       #endif
             
-               // If there are no customers in line, then the server is not busy.
+               // If there are no customers in line, then the server must not be
+	       // busy.
                if(server[j].count==0)
-               server[j].busy = FALSE;
-
+                  server[j].busy = FALSE;
             }
          }
-      }
+      } // End of for-loop.
 
-      // Update masterBusy flag.
+      // Update masterBusy flag. Keeps through all of the servers to see if any
+      // of them are still processing customers.
       masterBusy = server[0].busy;
       for(i=1; i<numServer; i++) {
          masterBusy = masterBusy&server[i].busy;
       }
 
-      // Update masterFull flag.
+      // Update masterFull flag. This is outside of the for loop since it would
+      // be more efficient to process the full flags after handling all of the
+      // departures.
       masterFull = server[0].full;
       for(i=1; i<numServer; i++)
          masterFull = masterFull&server[i].full;
