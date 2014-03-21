@@ -1,20 +1,42 @@
-Lab 3 Coffee Shop simulator
-This directory includes
+Lab 3 Coffee Shop Simulator
+Modified By  : Steven Chen
+Last Modified: 03.21.2014
 
-* queue.c -- coffee shop simulator assuming the shop can hold
-  at most one customer.  You should modify this.
+Assignment:
+This simulator program has both task 1 and task 2 completed. Queue was added and
+an adjustable number of servers were added.
 
-* trafficgen.c -- generates random customer arrivals and
-  service times.  You don't need to modify this. I included
-  this for your information.
-  
-* traffic.dat -- Traffic file.  It's the traffic you use
-  for this lab
+Source File(s):
+There are no addition source files added to the program. Assignement was
+completed by modifiying the pre-existing "queue.c" file provided by
+Dr. Sasaki. A makefile was created for compiling, however I do not count this
+as a source file.
 
-* test.dat -- small sample traffic file used for testing.
-  You can create your own.
+* queue.c  -- Coffee shop simulator with two possible servers each with a six
+              customer capacity. The max number of servers in the shop can be
+	      modified with the MACRO "MAXSERVER", which will adjust the
+	      program automatically. The max number of customers per server
+	      can be modifed with the MARCO "CAPACITY", which will adjust the
+	      program automatically.
 
-No make files here.  Just compile using gcc file.c
-Then run by typing ./a.out
+* makefile -- Contains the build information for this assignment.
 
+* other    -- Default files provided by Dr. Sasaki. No to minimum changes were
+              done to them.
 
+Compiling Instructions:
+Simplily enter "make" into the prompt. The makefile will compile the rest.
+
+Run-time Instructions:
+Run the simulator by entering "coffeeShop" or "./coffeeShop" into the prompt.
+Next, load a sample file as prompted by the simulator. For this example, you
+can use "traffic.dat" as the sample file. After, the simulator will prompt you
+for the number of servers. Once the number of servers have been selected, the 
+simulator will do the rest of the work and the results will be printed to the 
+screen.
+
+Note:
+I added event text to the simulator for debugging purposes and for fun. If you
+want to access these event text, then you must uncomment the MACRO "SCRIPT" from
+"queue.c" and recompile. Rerunning the program will result in event text that
+narrate the behavior of the customers.
